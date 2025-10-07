@@ -18,34 +18,34 @@ JUMP_STRENGTH = -600  # pixels per second
 FPS = 60
 MAX_JUMPS = 3
 TILE_SIZE = 32
+PLAYER_HEIGHT = 48
+PLAYER_WIDTH = TILE_SIZE
 
 # Player state
-player_x = 100.0  # Use floats for smooth sub-pixel movement
-player_y = 400.0
+player_x = 40.0  # Use floats for smooth sub-pixel movement
+player_y = 200.0
 player_vel_x = 0.0
 player_vel_y = 0.0
 
 jump_count = 0
 is_jumping = False
 
-# Tile constants
-TILE_SIZE = 32
-
 # fmt: off
 # 960x640 = 30 tiles wide x 20 tiles tall
+# Tile types: 0 = air, 1 = solid ground, 2 = cloud (decorative)
 tile_map = [
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 0 (top)
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 1
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 2
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 3
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 4
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 5
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 6 - floating platform
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 7
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 8
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 9
-    [0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],  # Row 10 - mid platforms
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 11
+    [0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0],  # Row 0 (top)
+    [0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 2, 2, 0, 0, 0, 0],  # Row 1
+    [0, 2, 2, 0, 2, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0],  # Row 2
+    [0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0],  # Row 3
+    [0, 0, 0, 0, 0, 2, 2, 2, 0, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 4
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 5
+    [0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 6 - floating platform
+    [0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 7
+    [0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0],  # Row 8
+    [0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 9
+    [0, 0, 0, 0, 0, 0, 2, 1, 1, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],  # Row 10 - mid platforms
+    [0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 11
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 12
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 13
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 14
@@ -90,14 +90,22 @@ while running:
     player_vel_y += GRAVITY * dt
     player_x += player_vel_x * dt
     player_y += player_vel_y * dt
+    player_bottom = player_y + PLAYER_HEIGHT
+    player_tile_row = int(player_bottom // TILE_SIZE)
+    player_tile_left_col = int(player_x // TILE_SIZE)
+    player_tile_right_col = int((player_x + PLAYER_WIDTH - 1) // TILE_SIZE)
 
-    # Collision (positions are still frame-based)
-    if player_y > 500:
-        player_y = 500
-        player_vel_y = 0
-        jump_count = 0
-        is_jumping = False
-        player_vel_x = 0
+    if (
+        tile_map[player_tile_row][player_tile_left_col] == 1
+        or tile_map[player_tile_row][player_tile_right_col] == 1
+    ):
+        if player_vel_y > 0:
+            # Collusion detected
+            player_y = player_tile_row * TILE_SIZE - PLAYER_HEIGHT
+            player_vel_y = 0
+            jump_count = 0
+            is_jumping = False
+            player_vel_x = 0
 
     # Draw
     screen.fill((135, 206, 235))
@@ -105,14 +113,27 @@ while running:
     for row in range(len(tile_map)):
         for col in range(len(tile_map[row])):
             tile_type = tile_map[row][col]
-            if tile_type != 0:
+            if tile_type == 0:
+                continue
+
+            if tile_type == 1:
                 pygame.draw.rect(
                     screen,
                     (100, 100, 100),
                     (col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE),
                 )
+            elif tile_type == 2:
+                pygame.draw.rect(
+                    screen,
+                    (255, 255, 255),
+                    (col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE),
+                )
 
-    pygame.draw.rect(screen, (255, 100, 100), (int(player_x), int(player_y), 32, 48))
+    pygame.draw.rect(
+        screen,
+        (255, 100, 100),
+        (int(player_x), int(player_y), PLAYER_WIDTH, PLAYER_HEIGHT),
+    )
     pygame.display.flip()
 
 pygame.quit()
