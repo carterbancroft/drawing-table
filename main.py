@@ -1,3 +1,6 @@
+import json
+import os
+
 import pygame
 
 pygame.init()
@@ -11,51 +14,33 @@ clock = pygame.time.Clock()
 running = True
 dt = 0
 
+level_data_path = os.path.join("data", "levels", "level_1.json")
+with open(level_data_path, "r") as f:
+    level_data = json.load(f)
+
 # Physics constants (in units per SECOND now)
 MOVE_SPEED = 300  # pixels per second
 GRAVITY = 1500  # pixels per second squared
 JUMP_STRENGTH = -600  # pixels per second
 FPS = 60
 MAX_JUMPS = 3
-TILE_SIZE = 32
+TILE_SIZE = level_data["tile_size"]
 PLAYER_HEIGHT = 48
 PLAYER_WIDTH = TILE_SIZE
 
 # Player state
-player_x = 40.0  # Use floats for smooth sub-pixel movement
-player_y = 200.0
+player_x = level_data["spawn_point"]["x"]
+player_y = level_data["spawn_point"]["y"]
 player_vel_x = 0.0
 player_vel_y = 0.0
 
 jump_count = 0
 is_jumping = False
 
-# fmt: off
+
 # 960x640 = 30 tiles wide x 20 tiles tall
 # Tile types: 0 = air, 1 = solid ground, 2 = cloud (decorative)
-tile_map = [
-    [0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0],  # Row 0 (top)
-    [0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 2, 2, 0, 0, 0, 0],  # Row 1
-    [0, 2, 2, 0, 2, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0],  # Row 2
-    [0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0],  # Row 3
-    [0, 0, 0, 0, 0, 2, 2, 2, 0, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 4
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 5
-    [0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 6 - floating platform
-    [0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 7
-    [0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0],  # Row 8
-    [0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 9
-    [0, 0, 0, 0, 0, 0, 2, 1, 1, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],  # Row 10 - mid platforms
-    [0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 11
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 12
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 13
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 14
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 15
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 16
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 17
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Row 18
-    [1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1],  # Row 19 (bottom) - ground with gaps
-]
-# fmt: on
+tile_map = level_data["tile_map"]
 
 while running:
     # Get delta time in seconds
@@ -112,16 +97,20 @@ while running:
 
     for row in range(len(tile_map)):
         for col in range(len(tile_map[row])):
+            # Air
             tile_type = tile_map[row][col]
             if tile_type == 0:
                 continue
 
+            # Ground
             if tile_type == 1:
                 pygame.draw.rect(
                     screen,
                     (100, 100, 100),
                     (col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE),
                 )
+
+            # Cloud
             elif tile_type == 2:
                 pygame.draw.rect(
                     screen,
