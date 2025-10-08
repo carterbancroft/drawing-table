@@ -22,32 +22,39 @@ class Renderer:
 
         return surface
 
-    def draw(self, level, player_x, player_y):
+    def draw(self, level, entities):
         self.screen.fill((135, 206, 235))
-        player_drawn = False
         TILE_SIZE = level.data["tile_size"]
-        PLAYER_WIDTH = TILE_SIZE
-        PLAYER_HEIGHT = 48
+
+        drawables = []
 
         for layer in level.layers:
-            tile_map = layer["tile_map"]
+            drawables.append(
+                {"type": "layer", "object": layer, "z_index": layer["z_index"]}
+            )
 
-            if not player_drawn and level.data["player_z_index"] < layer["z_index"]:
-                pygame.draw.rect(
-                    self.screen,
-                    (255, 100, 100),
-                    (int(player_x), int(player_y), PLAYER_WIDTH, PLAYER_HEIGHT),
-                )
-                player_drawn = True
+        for entity in entities:
+            drawables.append(
+                {"type": "entity", "object": entity, "z_index": entity.z_index}
+            )
 
-            for row in range(len(tile_map)):
-                for col in range(len(tile_map[row])):
-                    tile_type = tile_map[row][col]
-                    if tile_type not in self.tile_surfaces:
-                        continue
+        drawables.sort(key=lambda d: d["z_index"])
 
-                    self.screen.blit(
-                        self.tile_surfaces[tile_type],
-                        (col * TILE_SIZE, row * TILE_SIZE),
-                    )
+        for drawable in drawables:
+            if drawable["type"] == "layer":
+                tile_map = drawable["object"]["tile_map"]
+                for row in range(len(tile_map)):
+                    for col in range(len(tile_map[row])):
+                        tile_type = tile_map[row][col]
+                        if tile_type not in self.tile_surfaces:
+                            continue
+
+                        self.screen.blit(
+                            self.tile_surfaces[tile_type],
+                            (col * TILE_SIZE, row * TILE_SIZE),
+                        )
+
+            if drawable["type"] == "entity":
+                drawable["object"].draw(self.screen)
+
         pygame.display.flip()
