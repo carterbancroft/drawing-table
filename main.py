@@ -37,8 +37,12 @@ player_vel_y = 0.0
 jump_count = 0
 is_jumping = False
 
-
 sorted_layers = sorted(level_data["layers"], key=lambda layer: layer["z_index"])
+
+# Create once before game loop
+cloud_tile = pygame.Surface((TILE_SIZE, TILE_SIZE))
+cloud_tile.set_alpha(128)
+cloud_tile.fill((255, 255, 255))
 
 while running:
     # Get delta time in seconds
@@ -127,11 +131,7 @@ while running:
 
                 # Cloud
                 elif tile_type == 2:
-                    pygame.draw.rect(
-                        screen,
-                        (255, 255, 255),
-                        (col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE),
-                    )
+                    screen.blit(cloud_tile, (col * TILE_SIZE, row * TILE_SIZE))
 
     pygame.display.flip()
 
