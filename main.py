@@ -38,9 +38,7 @@ jump_count = 0
 is_jumping = False
 
 
-# 960x640 = 30 tiles wide x 20 tiles tall
-# Tile types: 0 = air, 1 = solid ground, 2 = cloud (decorative)
-tile_map = level_data["tile_map"]
+sorted_layers = sorted(level_data["layers"], key=lambda layer: layer["z_index"])
 
 while running:
     # Get delta time in seconds
@@ -80,49 +78,61 @@ while running:
     player_tile_left_col = int(player_x // TILE_SIZE)
     player_tile_right_col = int((player_x + PLAYER_WIDTH - 1) // TILE_SIZE)
 
-    if (
-        tile_map[player_tile_row][player_tile_left_col] == 1
-        or tile_map[player_tile_row][player_tile_right_col] == 1
-    ):
-        if player_vel_y > 0:
-            # Collusion detected
-            player_y = player_tile_row * TILE_SIZE - PLAYER_HEIGHT
-            player_vel_y = 0
-            jump_count = 0
-            is_jumping = False
-            player_vel_x = 0
+    for layer in sorted_layers:
+        if not layer["solid"]:
+            continue
+
+        tile_map = layer["tile_map"]
+        if (
+            tile_map[player_tile_row][player_tile_left_col] != 0
+            or tile_map[player_tile_row][player_tile_right_col] != 0
+        ):
+            if player_vel_y > 0:
+                # Collision detected
+                player_y = player_tile_row * TILE_SIZE - PLAYER_HEIGHT
+                player_vel_y = 0
+                jump_count = 0
+                is_jumping = False
+                player_vel_x = 0
 
     # Draw
     screen.fill((135, 206, 235))
+    player_drawn = False
 
-    for row in range(len(tile_map)):
-        for col in range(len(tile_map[row])):
-            # Air
-            tile_type = tile_map[row][col]
-            if tile_type == 0:
-                continue
+    for layer in sorted_layers:
+        tile_map = layer["tile_map"]
 
-            # Ground
-            if tile_type == 1:
-                pygame.draw.rect(
-                    screen,
-                    (100, 100, 100),
-                    (col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE),
-                )
+        if not player_drawn and level_data["player_z_index"] < layer["z_index"]:
+            pygame.draw.rect(
+                screen,
+                (255, 100, 100),
+                (int(player_x), int(player_y), PLAYER_WIDTH, PLAYER_HEIGHT),
+            )
+            player_drawn = True
 
-            # Cloud
-            elif tile_type == 2:
-                pygame.draw.rect(
-                    screen,
-                    (255, 255, 255),
-                    (col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE),
-                )
+        for row in range(len(tile_map)):
+            for col in range(len(tile_map[row])):
+                # Air
+                tile_type = tile_map[row][col]
+                if tile_type == 0:
+                    continue
 
-    pygame.draw.rect(
-        screen,
-        (255, 100, 100),
-        (int(player_x), int(player_y), PLAYER_WIDTH, PLAYER_HEIGHT),
-    )
+                # Ground
+                if tile_type == 1:
+                    pygame.draw.rect(
+                        screen,
+                        (100, 100, 100),
+                        (col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE),
+                    )
+
+                # Cloud
+                elif tile_type == 2:
+                    pygame.draw.rect(
+                        screen,
+                        (255, 255, 255),
+                        (col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE),
+                    )
+
     pygame.display.flip()
 
 pygame.quit()
