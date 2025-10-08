@@ -31,9 +31,9 @@ class Player(Entity):
         else:
             # Add momentum decay here if jumping
             if self.is_jumping:
-                self.vel_x *= 0.95
+                self.x_vel *= 0.95
             else:
-                self.vel_x = 0
+                self.x_vel = 0
 
     def draw(self, screen):
         pygame.draw.rect(
@@ -42,8 +42,32 @@ class Player(Entity):
             (int(self.x_pos), int(self.y_pos), self.width, self.height),
         )
 
-    def update(self, delta, level):
+    def update(self, delta):
         self.y_vel += self.gravity * delta
         self.x_pos += self.x_vel * delta
         self.y_pos += self.y_vel * delta
         self.bottom = self.y_pos + self.height
+
+    def detect_collision(self, level):
+        tile_size = level.data["tile_size"]
+
+        player_tile_row = int(self.bottom // tile_size)
+        player_tile_left_col = int(self.x_pos // tile_size)
+        player_tile_right_col = int((self.x_pos + self.width - 1) // tile_size)
+
+        for layer in level.layers:
+            if not layer["solid"]:
+                continue
+
+            tile_map = layer["tile_map"]
+            if (
+                tile_map[player_tile_row][player_tile_left_col] != 0
+                or tile_map[player_tile_row][player_tile_right_col] != 0
+            ):
+                if self.y_vel > 0:
+                    # Collision detected
+                    self.y_pos = player_tile_row * tile_size - self.height
+                    self.y_vel = 0
+                    self.jump_count = 0
+                    self.is_jumping = False
+                    self.x_vel = 0
