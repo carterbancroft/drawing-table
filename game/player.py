@@ -55,23 +55,39 @@ class Player(Entity):
     def detect_collision(self, level):
         tile_size = level.data["tile_size"]
 
-        player_tile_row = int(self.bottom // tile_size)
-        player_tile_left_col = int(self.x_pos // tile_size)
-        player_tile_right_col = int((self.x_pos + self.width - 1) // tile_size)
+        player_tile_row_below = int(self.bottom // tile_size)
+        player_tile_row_above = int(self.y_pos // tile_size)
+        player_tile_col_left = int(self.x_pos // tile_size)
+        player_tile_col_right = int((self.x_pos + self.width - 1) // tile_size)
 
         for layer in level.layers:
             if not layer["solid"]:
                 continue
 
             tile_map = layer["tile_map"]
+
+            # Check for a bottom collision
             if (
-                tile_map[player_tile_row][player_tile_left_col] != 0
-                or tile_map[player_tile_row][player_tile_right_col] != 0
+                tile_map[player_tile_row_below][player_tile_col_left] != 0
+                or tile_map[player_tile_row_below][player_tile_col_right] != 0
             ):
+                # If we're falling...
                 if self.y_vel > 0:
                     # Collision detected
-                    self.y_pos = player_tile_row * tile_size - self.height
+                    self.y_pos = player_tile_row_below * tile_size - self.height
                     self.y_vel = 0
                     self.jump_count = 0
                     self.is_jumping = False
+                    self.x_vel = 0
+
+            # Check for top collision
+            if (
+                tile_map[player_tile_row_above][player_tile_col_left] != 0
+                or tile_map[player_tile_row_above][player_tile_col_right] != 0
+            ):
+                # If we're moving up...
+                if self.y_vel < 0:
+                    # Collision detected
+                    self.y_pos = (player_tile_row_above + 1) * tile_size
+                    self.y_vel = 0
                     self.x_vel = 0
