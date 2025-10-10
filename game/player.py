@@ -13,22 +13,26 @@ class Player(Entity):
         self.jump_count = 0
         self.max_jumps = 3
         self.is_jumping = False
+        self.is_moving = False
         self.bottom = self.y_pos + self.height
 
-    def handle_event(self, event):
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                self.jump_count += 1
-                if self.jump_count <= self.max_jumps:
-                    self.is_jumping = True
-                    self.y_vel = self.jump_strength
-
-    def handle_input(self, keys):
-        if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+    def handle_input(self, input_handler):
+        if input_handler.is_held(pygame.K_d) or input_handler.is_held(pygame.K_RIGHT):
+            self.is_moving = True
             self.x_vel = self.move_speed
-        elif keys[pygame.K_a] or keys[pygame.K_LEFT]:
+        elif input_handler.is_held(pygame.K_a) or input_handler.is_held(pygame.K_LEFT):
+            self.is_moving = True
             self.x_vel = -self.move_speed
         else:
+            self.is_moving = False
+
+        if input_handler.is_pressed(pygame.K_SPACE):
+            self.jump_count += 1
+            if self.jump_count <= self.max_jumps:
+                self.is_jumping = True
+                self.y_vel = self.jump_strength
+
+        if not self.is_moving:
             # Add momentum decay here if jumping
             if self.is_jumping:
                 self.x_vel *= 0.95

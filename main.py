@@ -2,7 +2,7 @@ import os
 
 import pygame
 
-from engine import Level, Renderer
+from engine import InputHandler, Level, Renderer
 from game import Player
 
 pygame.init()
@@ -19,6 +19,8 @@ dt = 0
 level_data_path = os.path.join("data", "levels", "level_1.json")
 level = Level(level_data_path)
 renderer = Renderer(screen, level.data["tile_size"])
+input_handler = InputHandler()
+
 
 FPS = 60
 
@@ -32,10 +34,9 @@ while running:
         if event.type == pygame.QUIT or event.type == pygame.K_ESCAPE:
             running = False
 
-        player.handle_event(event)
+    input_handler.update()
 
-    keys = pygame.key.get_pressed()
-    player.handle_input(keys)
+    player.handle_input(input_handler)
     player.update(delta)
     player.detect_collision(level)
 
