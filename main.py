@@ -35,10 +35,7 @@ while running:
             running = False
 
     input_handler.update()
-
-    player.handle_input(input_handler)
-    player.update(delta)
-    player.detect_collision(level)
+    player.update(delta, input_handler, level)
 
     renderer.draw(level, [player])
 

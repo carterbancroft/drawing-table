@@ -46,17 +46,53 @@ class Player(Entity):
             (int(self.x_pos), int(self.y_pos), self.width, self.height),
         )
 
-    def update(self, delta):
-        self.y_vel += self.gravity * delta
+    def update(self, delta, input_handler, level):
+        self.handle_input(input_handler)
+
         self.x_pos += self.x_vel * delta
+        self.detect_horizontal_collision(level)
+
+        self.y_vel += self.gravity * delta
         self.y_pos += self.y_vel * delta
         self.bottom = self.y_pos + self.height
+        self.detect_vertical_collision(level)
 
-    def detect_collision(self, level):
+    def detect_horizontal_collision(self, level):
         tile_size = level.data["tile_size"]
 
-        player_tile_row_below = int(self.bottom // tile_size)
         player_tile_row_above = int(self.y_pos // tile_size)
+        player_tile_row_below = int((self.bottom - 1) // tile_size)
+        player_tile_col_left = int(self.x_pos // tile_size)
+        player_tile_col_right = int((self.x_pos + self.width - 1) // tile_size)
+
+        for layer in level.layers:
+            if not layer["solid"]:
+                continue
+
+            tile_map = layer["tile_map"]
+
+            # Check for right collision
+            if self.x_vel > 0:
+                for row in range(player_tile_row_above, player_tile_row_below):
+                    if tile_map[row][player_tile_col_right] != 0:
+                        self.x_pos = player_tile_col_right * tile_size - self.width
+                        self.x_vel = 0
+                        break
+
+            # Check for left collision
+            if self.x_vel < 0:
+                for row in range(player_tile_row_above, player_tile_row_below):
+                    if tile_map[row][player_tile_col_left] != 0:
+                        print("left collision detected")
+                        self.x_pos = (player_tile_col_left + 1) * tile_size
+                        self.x_vel = 0
+                        break
+
+    def detect_vertical_collision(self, level):
+        tile_size = level.data["tile_size"]
+
+        player_tile_row_above = int(self.y_pos // tile_size)
+        player_tile_row_below = int((self.bottom - 1) // tile_size)
         player_tile_col_left = int(self.x_pos // tile_size)
         player_tile_col_right = int((self.x_pos + self.width - 1) // tile_size)
 
@@ -78,7 +114,6 @@ class Player(Entity):
                     self.y_vel = 0
                     self.jump_count = 0
                     self.is_jumping = False
-                    self.x_vel = 0
 
             # Check for top collision
             if (
@@ -90,4 +125,3 @@ class Player(Entity):
                     # Collision detected
                     self.y_pos = (player_tile_row_above + 1) * tile_size
                     self.y_vel = 0
-                    self.x_vel = 0

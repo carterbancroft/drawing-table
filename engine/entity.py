@@ -8,10 +8,7 @@ class Entity:
         self.height = height
         self.z_index = z_index
 
-    def update(
-        self,
-        delta,
-    ):
+    def update(self, delta, input_handler, level):
         pass
 
     def draw(self, screen):
