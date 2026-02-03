@@ -14,6 +14,7 @@ class Player(Entity):
         self.max_jumps = 3
         self.is_jumping = False
         self.is_moving = False
+        self.is_grounded = False
         self.bottom = self.y_pos + self.height
 
     def handle_input(self, input_handler):
@@ -30,6 +31,7 @@ class Player(Entity):
             self.jump_count += 1
             if self.jump_count <= self.max_jumps:
                 self.is_jumping = True
+                self.is_grounded = False
                 self.y_vel = self.jump_strength
 
         if not self.is_moving:
@@ -52,7 +54,9 @@ class Player(Entity):
         self.x_pos += self.x_vel * delta
         self.detect_horizontal_collision(level)
 
-        self.y_vel += self.gravity * delta
+        if not self.is_grounded:
+            self.y_vel += self.gravity * delta
+
         self.y_pos += self.y_vel * delta
         self.bottom = self.y_pos + self.height
         self.detect_vertical_collision(level)
@@ -91,9 +95,12 @@ class Player(Entity):
         tile_size = level.data["tile_size"]
 
         player_tile_row_above = int(self.y_pos // tile_size)
-        player_tile_row_below = int((self.bottom - 1) // tile_size)
+        player_tile_row_below = int((self.bottom) // tile_size)
         player_tile_col_left = int(self.x_pos // tile_size)
         player_tile_col_right = int((self.x_pos + self.width - 1) // tile_size)
+
+        # Assume not grounded until we prove otherwise
+        self.is_grounded = False
 
         for layer in level.layers:
             if not layer["solid"]:
@@ -106,6 +113,8 @@ class Player(Entity):
                 tile_map[player_tile_row_below][player_tile_col_left] != 0
                 or tile_map[player_tile_row_below][player_tile_col_right] != 0
             ):
+                self.is_grounded = True  # Set grounded if tile exists below
+
                 # If we're falling...
                 if self.y_vel > 0:
                     # Collision detected

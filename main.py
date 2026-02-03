@@ -6,6 +6,7 @@ from engine import InputHandler, Level, Renderer
 from game import Player
 
 pygame.init()
+pygame.font.init()
 
 s_width = 960
 s_height = 640
@@ -18,6 +19,8 @@ level = Level(level_data_path)
 renderer = Renderer(screen, level.data["tile_size"])
 input_handler = InputHandler()
 player = Player(level.data["spawn_point"]["x"], level.data["spawn_point"]["y"])
+
+font = pygame.font.SysFont("monospace", 25)
 
 FPS = 60
 delta = 0
@@ -35,5 +38,12 @@ while running:
     player.update(delta, input_handler, level)
 
     renderer.draw(level, [player])
+
+    position_text_surface = font.render(
+        f"X: {int(player.x_pos)} Y: {int(player.y_pos)}", True, (0, 0, 0)
+    )
+    screen.blit(position_text_surface, (25, 25))
+
+    pygame.display.flip()
 
 pygame.quit()
