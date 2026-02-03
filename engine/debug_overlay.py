@@ -14,4 +14,4 @@ class DebugOverlay:
         )
 
     def draw(self, screen):
-        self.screen.blit(self.surface, (self.x_pos, self.y_pos))
+        screen.blit(self.surface, (self.x_pos, self.y_pos))
