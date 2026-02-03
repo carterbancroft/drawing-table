@@ -47,8 +47,6 @@ class Renderer:
             if drawable["type"] == "entity":
                 drawable["object"].draw(self.screen)
 
-        # pygame.display.flip()
-
     def _draw_layer(self, layer):
         tile_map = layer["tile_map"]
 
