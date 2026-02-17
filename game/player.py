@@ -41,11 +41,16 @@ class Player(Entity):
             else:
                 self.x_vel = 0
 
-    def draw(self, screen):
+    def draw(self, screen, camera):
         pygame.draw.rect(
             screen,
             (255, 100, 100),
-            (int(self.x_pos), int(self.y_pos), self.width, self.height),
+            (
+                int(self.x_pos - camera.x_pos),
+                int(self.y_pos - camera.y_pos),
+                self.width,
+                self.height,
+            ),
         )
 
     def update(self, delta, input_handler, level):

@@ -1,6 +1,5 @@
 {
-  "spawn_point": {"x": 40.0, "y": 200.0},
-  "camera_start_point": {"x": 0.0, "y": 240.0},
+  "spawn_point": {"x": 700.0, "y": 200.0},
   "player_z_index": 1,
   "tile_size": 32,
   "layers": [

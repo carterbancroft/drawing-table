@@ -1,3 +1,4 @@
+from .camera import Camera
 from .debug_overlay import DebugOverlay
 from .entity import Entity
 from .input_handler import InputHandler

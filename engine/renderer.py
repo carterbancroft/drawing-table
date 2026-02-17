@@ -23,7 +23,7 @@ class Renderer:
 
         return surface
 
-    def draw(self, level, entities):
+    def draw(self, level, camera, entities):
         self.screen.fill((135, 206, 235))
 
         drawables = []
@@ -42,12 +42,12 @@ class Renderer:
 
         for drawable in drawables:
             if drawable["type"] == "layer":
-                self._draw_layer(drawable["object"])
+                self._draw_layer(drawable["object"], camera)
 
             if drawable["type"] == "entity":
-                drawable["object"].draw(self.screen)
+                drawable["object"].draw(self.screen, camera)
 
-    def _draw_layer(self, layer):
+    def _draw_layer(self, layer, camera):
         tile_map = layer["tile_map"]
 
         for row in range(len(tile_map)):
@@ -58,5 +58,8 @@ class Renderer:
 
                 self.screen.blit(
                     self.tile_surfaces[tile_type],
-                    (col * self.tile_size, row * self.tile_size),
+                    (
+                        col * self.tile_size - camera.x_pos,
+                        row * self.tile_size - camera.y_pos,
+                    ),
                 )

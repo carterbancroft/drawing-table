@@ -6,12 +6,22 @@ class DebugOverlay:
         self.font = pygame.font.SysFont("monospace", 25)
         self.x_pos = x_pos
         self.y_pos = y_pos
-        self.surface = None
+        self.player_debug_surface = None
+        self.camera_debug_surface = None
 
-    def update(self, player):
-        self.surface = self.font.render(
-            f"X: {int(player.x_pos)} Y: {int(player.y_pos)}", True, (0, 0, 0)
+    def update(self, player, camera):
+        self.player_debug_surface = self.font.render(
+            f"Player X: {int(player.x_pos)} Player Y: {int(player.y_pos)}",
+            True,
+            (0, 0, 0),
+        )
+
+        self.camera_debug_surface = self.font.render(
+            f"Camera X: {int(camera.x_pos)} Camera Y: {int(camera.y_pos)}",
+            True,
+            (0, 0, 0),
         )
 
     def draw(self, screen):
-        screen.blit(self.surface, (self.x_pos, self.y_pos))
+        screen.blit(self.player_debug_surface, (self.x_pos, self.y_pos))
+        screen.blit(self.camera_debug_surface, (self.x_pos, self.y_pos + 25))

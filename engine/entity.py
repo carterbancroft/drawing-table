@@ -11,5 +11,5 @@ class Entity:
     def update(self, delta, input_handler, level):
         pass
 
-    def draw(self, screen):
+    def draw(self, screen, camera):
         pass
