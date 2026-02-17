@@ -23,7 +23,7 @@ debug_overlay = DebugOverlay(25, 25)
 
 camera_start_x = player.x_pos - screen.width / 2
 camera_start_y = player.y_pos - screen.height / 2
-camera = Camera(camera_start_x, camera_start_y)
+camera = Camera(camera_start_x, camera_start_y, screen)
 
 FPS = 60
 delta = 0
@@ -40,9 +40,9 @@ while running:
     input_handler.update()
     player.update(delta, input_handler, level)
     debug_overlay.update(player, camera)
-    camera.update(player, screen)
+    camera.update(player)
 
-    renderer.draw(level, camera, [player])
+    renderer.draw(level, camera, screen, [player])
     debug_overlay.draw(screen)
 
     pygame.display.flip()
