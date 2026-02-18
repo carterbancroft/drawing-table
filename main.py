@@ -23,7 +23,7 @@ debug_overlay = DebugOverlay(25, 25)
 
 camera_start_x = player.x_pos - screen.width / 2
 camera_start_y = player.y_pos - screen.height / 2
-camera = Camera(camera_start_x, camera_start_y, screen)
+camera = Camera(camera_start_x, camera_start_y, screen, level)
 
 FPS = 60
 delta = 0
