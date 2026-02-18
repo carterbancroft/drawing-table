@@ -42,7 +42,7 @@ while running:
     debug_overlay.update(player, camera)
     camera.update(player)
 
-    renderer.draw(level, camera, screen, [player])
+    renderer.draw(level, camera, [player])
     debug_overlay.draw(screen)
 
     pygame.display.flip()

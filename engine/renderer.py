@@ -50,21 +50,26 @@ class Renderer:
     def _draw_layer(self, layer, camera):
         tile_map = layer["tile_map"]
 
-        for row in range(len(tile_map)):
-            for col in range(len(tile_map[row])):
+        first_col = max(0, int(camera.x_pos // self.tile_size))
+        last_col = min(
+            int((camera.x_pos + self.screen.width + self.tile_size) // self.tile_size),
+            len(tile_map[0]),
+        )
+
+        first_row = max(0, int(camera.y_pos // self.tile_size))
+        last_row = min(
+            int((camera.y_pos + self.screen.height + self.tile_size) // self.tile_size),
+            len(tile_map),
+        )
+
+        for row in range(first_row, last_row):
+            for col in range(first_col, last_col):
                 tile_type = tile_map[row][col]
                 if tile_type not in self.tile_surfaces:
                     continue
 
                 tile_x_pos = col * self.tile_size - camera.x_pos
                 tile_y_pos = row * self.tile_size - camera.y_pos
-
-                is_on_camera = camera.is_on_camera(
-                    tile_x_pos, tile_y_pos, self.tile_size, self.tile_size
-                )
-
-                if not is_on_camera:
-                    continue
 
                 self.screen.blit(
                     self.tile_surfaces[tile_type],
