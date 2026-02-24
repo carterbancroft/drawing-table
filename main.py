@@ -8,7 +8,7 @@ from game import Player
 pygame.init()
 pygame.font.init()
 
-s_width = 960
+s_width = 1160
 s_height = 640
 
 screen = pygame.display.set_mode((s_width, s_height))
@@ -19,7 +19,7 @@ level = Level(level_data_path)
 renderer = Renderer(screen, level.data["tile_size"])
 input_handler = InputHandler()
 player = Player(level.data["spawn_point"]["x"], level.data["spawn_point"]["y"])
-debug_overlay = DebugOverlay(25, 25)
+debug_overlay = DebugOverlay(5, 5)
 
 camera = Camera(player, screen, level)
 
@@ -41,8 +41,7 @@ while running:
     camera.update(player)
 
     renderer.draw(level, camera, [player])
-    debug_overlay.draw(screen)
-    camera.draw_deadzone(screen)
+    debug_overlay.draw(player, camera, screen)
 
     pygame.display.flip()
 

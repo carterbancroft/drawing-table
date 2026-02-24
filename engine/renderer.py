@@ -68,8 +68,8 @@ class Renderer:
                 if tile_type not in self.tile_surfaces:
                     continue
 
-                tile_x_pos = col * self.tile_size - camera.x_pos
-                tile_y_pos = row * self.tile_size - camera.y_pos
+                tile_x_pos = camera.to_screen_x(col * self.tile_size)
+                tile_y_pos = camera.to_screen_y(row * self.tile_size)
 
                 self.screen.blit(
                     self.tile_surfaces[tile_type],

@@ -16,23 +16,27 @@ class Camera:
         self.deadzone_y_pos = player.center_y_pos - self.deadzone_height / 2
 
     def update(self, player):
+        # Check the player's positioning relative to the deadzone...
+
+        ## If the player is at the left edge of the deadzone...
         if player.center_x_pos < self.deadzone_x_pos:
             self.deadzone_x_pos = player.center_x_pos
+        ## Else if the player is at the right edge of the deadzone...
         elif player.center_x_pos > self.deadzone_x_pos + self.deadzone_width:
             self.deadzone_x_pos = player.center_x_pos - self.deadzone_width
 
+        ## If the player is at the top edge of the deadzone...
         if player.center_y_pos < self.deadzone_y_pos:
             self.deadzone_y_pos = player.center_y_pos
+        ## Else if the player is at the bottom edge the deadzone...
         elif player.center_y_pos > self.deadzone_y_pos + self.deadzone_height:
             self.deadzone_y_pos = player.center_y_pos - self.deadzone_height
 
-        # Adjust the updated camera position based on the player's current position
+        # Adjust the updated camera position based on the player's current position within the deadzone
         new_x_pos = self.deadzone_x_pos - (self.camera_width - self.deadzone_width) / 2
         new_y_pos = (
             self.deadzone_y_pos - (self.camera_height - self.deadzone_height) / 2
         )
-
-        # print(f"new_x_pos: {new_x_pos}, new_y_pos: {new_y_pos}")
 
         # Lock the camera on the X axis it...
         # 1. We're at the far left of the level
@@ -68,15 +72,8 @@ class Camera:
 
         return True
 
-    def draw_deadzone(self, screen):
-        pygame.draw.rect(
-            screen,
-            (255, 0, 0),  # Red outline
-            (
-                self.deadzone_x_pos - self.x_pos,
-                self.deadzone_y_pos - self.y_pos,
-                self.deadzone_width,
-                self.deadzone_height,
-            ),
-            2,  # border thickness
-        )
+    def to_screen_x(self, object_world_x_pos):
+        return object_world_x_pos - self.x_pos
+
+    def to_screen_y(self, object_world_y_pos):
+        return object_world_y_pos - self.y_pos

@@ -44,10 +44,10 @@ class Player(Entity):
     def draw(self, screen, camera):
         pygame.draw.rect(
             screen,
-            (255, 100, 100),
+            (100, 100, 255),
             (
-                int(self.x_pos - camera.x_pos),
-                int(self.y_pos - camera.y_pos),
+                camera.to_screen_x(self.x_pos),
+                camera.to_screen_y(self.y_pos),
                 self.width,
                 self.height,
             ),
