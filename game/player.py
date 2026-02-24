@@ -66,6 +66,8 @@ class Player(Entity):
         self.bottom = self.y_pos + self.height
         self.detect_vertical_collision(level)
 
+        super().update(delta, input_handler, level)
+
     def detect_horizontal_collision(self, level):
         tile_size = level.data["tile_size"]
 
