@@ -27,12 +27,6 @@ class DebugOverlay:
             (0, 0, 0),
         )
 
-        self.deadzone_debug_surface = self.font.render(
-            f"Deadzone X: {int(camera.deadzone_x_pos)} Deadzone Y: {int(camera.deadzone_y_pos)}",
-            True,
-            (0, 0, 0),
-        )
-
     def draw(self, player, camera, screen):
         self.draw_text(screen)
         self.draw_deadzone(camera, screen)
@@ -42,19 +36,44 @@ class DebugOverlay:
         screen.blit(self.player_x_debug_surface, (self.x_pos, self.y_pos))
         screen.blit(self.player_y_debug_surface, (self.x_pos, self.y_pos + 25))
         screen.blit(self.camera_debug_surface, (self.x_pos, self.y_pos + 50))
-        screen.blit(self.deadzone_debug_surface, (self.x_pos, self.y_pos + 75))
 
     def draw_deadzone(self, camera, screen):
-        pygame.draw.rect(
+        pygame.draw.line(
             screen,
             (255, 0, 0),  # Red outline
+            (camera.to_screen_x(camera.deadzone_x_pos), 0),
+            (camera.to_screen_x(camera.deadzone_x_pos), camera.height),
+            2,  # border thickness
+        )
+
+        pygame.draw.line(
+            screen,
+            (255, 0, 0),
+            (camera.to_screen_x(camera.deadzone_x_pos + camera.deadzone_width), 0),
             (
-                camera.to_screen_x(camera.deadzone_x_pos),
-                camera.to_screen_y(camera.deadzone_y_pos),
-                camera.deadzone_width,
-                camera.deadzone_height,
+                camera.to_screen_x(camera.deadzone_x_pos + camera.deadzone_width),
+                camera.height,
             ),
-            3,  # border thickness
+            2,
+        )
+
+        pygame.draw.line(
+            screen,
+            (255, 0, 0),
+            (0, camera.to_screen_y(camera.deadzone_y_pos)),
+            (camera.width, camera.to_screen_y(camera.deadzone_y_pos)),
+            2,
+        )
+
+        pygame.draw.line(
+            screen,
+            (255, 0, 0),
+            (0, camera.to_screen_y(camera.deadzone_y_pos + camera.deadzone_height)),
+            (
+                camera.width,
+                camera.to_screen_y(camera.deadzone_y_pos + camera.deadzone_height),
+            ),
+            2,
         )
 
     def draw_player_center(self, player, camera, screen):
