@@ -38,7 +38,7 @@ while running:
     input_handler.update()
     player.update(delta, input_handler, level)
     debug_overlay.update(player, camera)
-    camera.update(player)
+    camera.update(delta, player)
 
     renderer.draw(level, camera, [player])
     debug_overlay.draw(player, camera, screen)

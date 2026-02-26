@@ -8,6 +8,8 @@ class Camera:
         self.deadzone_width = self.width / 4
         self.deadzone_height = self.height / 4
 
+        self.lerp_speed = 5.0
+
         # Center the camera around the player while clamping to level edges if necessary depending on the spawn point.
         # See comment in update for what this is doing
         self.x_pos = max(
@@ -29,7 +31,7 @@ class Camera:
         self.deadzone_x_pos = self.x_pos - self.deadzone_width / 2
         self.deadzone_y_pos = self.y_pos - self.deadzone_height / 2
 
-    def update(self, player):
+    def update(self, delta, player):
         # Check the player's positioning relative to the deadzone and update deadzone accordingly.
         ## If the player is at the left edge of the deadzone...
         if player.center_x_pos < self.deadzone_x_pos:
@@ -45,6 +47,33 @@ class Camera:
         elif player.center_y_pos > self.deadzone_y_pos + self.deadzone_height:
             self.deadzone_y_pos = player.center_y_pos - self.deadzone_height
 
+        # I find this little piece of math so confusing so here's the explanation for my future self.
+        # Ultimately it is the next camera X location, not factoring into account clamping.
+        #
+        # This calculates where to position the camera so that the deadzone is centered horizontally on screen.
+        #
+        # Breaking it down:
+        #
+        # Given:
+        # - self.deadzone_x_pos = where the deadzone's left edge is in world space (say, 1000)
+        # - self.camera_width = screen width (say, 800px)
+        # - self.deadzone_width = deadzone width (say, 200px)
+        #
+        # Step by step:
+        # 1. (self.camera_width - self.deadzone_width) = empty space on screen not occupied by deadzone
+        #   - 800 - 200 = 600px of empty space
+        # 2. / 2 = split that empty space equally on left and right sides
+        #   - 600 / 2 = 300px on each side
+        # 3. self.deadzone_x_pos - [that margin] = move camera LEFT by that margin
+        #   - Deadzone at 1000, margin 300 → camera at 1000 - 300 = 700
+        #
+        # Result:
+        # - Camera runs from X=700 to X=1500 (800px wide)
+        # - Deadzone runs from X=1000 to X=1200 (200px wide)
+        # - 300px to the left, 300px to the right = centered!
+        target_x = self.deadzone_x_pos - (self.width - self.deadzone_width) / 2
+        lerped_x = self.lerp(self.x_pos, target_x, delta)
+
         # Adjust the updated camera position based on the player's current position within the deadzone
         # The max bit here clamps to the left side. The furthest left we can be is 0, move the camera
         # no further than that.
@@ -54,40 +83,20 @@ class Camera:
             # the camera would go were it to remain centered around the deadzone. This effectively clamps
             # to the right side and provides a value to reference for clamping to the left side.
             min(
-                # I find this little piece of math so confusing so here's the explanation for my future self.
-                #
-                # This calculates where to position the camera so that the deadzone is centered horizontally on screen.
-                #
-                # Breaking it down:
-                #
-                # Given:
-                # - self.deadzone_x_pos = where the deadzone's left edge is in world space (say, 1000)
-                # - self.camera_width = screen width (say, 800px)
-                # - self.deadzone_width = deadzone width (say, 200px)
-                #
-                # Step by step:
-                # 1. (self.camera_width - self.deadzone_width) = empty space on screen not occupied by deadzone
-                #   - 800 - 200 = 600px of empty space
-                # 2. / 2 = split that empty space equally on left and right sides
-                #   - 600 / 2 = 300px on each side
-                # 3. self.deadzone_x_pos - [that margin] = move camera LEFT by that margin
-                #   - Deadzone at 1000, margin 300 → camera at 1000 - 300 = 700
-                #
-                # Result:
-                # - Camera runs from X=700 to X=1500 (800px wide)
-                # - Deadzone runs from X=1000 to X=1200 (200px wide)
-                # - 300px to the left, 300px to the right = centered!
-                self.deadzone_x_pos - (self.width - self.deadzone_width) / 2,
+                lerped_x,
                 # Camera positioned on the far right side of the level
                 self.level_width - self.width,
             ),
         )
 
+        target_y = self.deadzone_y_pos - (self.height - self.deadzone_height) / 2
+        lerped_y = self.lerp(self.y_pos, target_y, delta)
+
         # This does the same as above for the y axis. The explanation above applies here too.
         self.y_pos = max(
             0,
             min(
-                self.deadzone_y_pos - (self.height - self.deadzone_height) / 2,
+                lerped_y,
                 self.level_height - self.height,
             ),
         )
@@ -117,3 +126,7 @@ class Camera:
     # Convert y coordinate in the full world to coordinates within the visible screen
     def to_screen_y(self, object_world_y_pos):
         return object_world_y_pos - self.y_pos
+
+    # Helper to do Linear interpolation to make the camera move smoothly
+    def lerp(self, start, end, delta):
+        return start + (end - start) * self.lerp_speed * delta
