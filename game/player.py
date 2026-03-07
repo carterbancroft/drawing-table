@@ -1,11 +1,13 @@
+import os
+
 import pygame
 
-from engine import Entity
+from engine import Entity, SpriteSheet
 
 
 class Player(Entity):
     def __init__(self, x_pos, y_pos):
-        super().__init__(x_pos, y_pos, width=32, height=48, z_index=1)
+        super().__init__(x_pos, y_pos, width=16, height=32, z_index=1)
 
         self.move_speed = 300  # pixels per second
         self.gravity = 1500  # pixeld per second squared
@@ -16,6 +18,9 @@ class Player(Entity):
         self.is_moving = False
         self.is_grounded = False
         self.bottom = self.y_pos + self.height
+
+        sprite_sheet_path = os.path.join("data", "sprites", "player.png")
+        self.sprites = SpriteSheet(sprite_sheet_path)
 
     def handle_input(self, input_handler):
         if input_handler.is_held(pygame.K_d) or input_handler.is_held(pygame.K_RIGHT):
@@ -42,14 +47,11 @@ class Player(Entity):
                 self.x_vel = 0
 
     def draw(self, screen, camera):
-        pygame.draw.rect(
-            screen,
-            (100, 100, 255),
+        screen.blit(
+            self.sprites.get_frame(0, 0, 16, 32),
             (
                 camera.to_screen_x(self.x_pos),
                 camera.to_screen_y(self.y_pos),
-                self.width,
-                self.height,
             ),
         )
 
