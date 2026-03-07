@@ -53,21 +53,22 @@ class Renderer:
 
     def _draw_layer(self, layer, camera):
         tile_map = layer["tile_map"]
-        parallax = layer.get("parallax_factor", 1.0)
+        parallax_x = layer.get("parallax_factor_x", 1.0)
+        parallax_y = layer.get("parallax_factor_y", 1.0)
 
-        first_col = max(0, int((camera.x_pos * parallax) // self.tile_size))
+        first_col = max(0, int((camera.x_pos * parallax_x) // self.tile_size))
         last_col = min(
             int(
-                ((camera.x_pos * parallax) + self.screen.width + self.tile_size)
+                ((camera.x_pos * parallax_x) + self.screen.width + self.tile_size)
                 // self.tile_size
             ),
             len(tile_map[0]),
         )
 
-        first_row = max(0, int((camera.y_pos * parallax) // self.tile_size))
+        first_row = max(0, int((camera.y_pos * parallax_y) // self.tile_size))
         last_row = min(
             int(
-                ((camera.y_pos * parallax) + self.screen.height + self.tile_size)
+                ((camera.y_pos * parallax_y) + self.screen.height + self.tile_size)
                 // self.tile_size
             ),
             len(tile_map),
@@ -79,8 +80,8 @@ class Renderer:
                 if tile_type not in self.tile_surfaces:
                     continue
 
-                tile_x_pos = col * self.tile_size - (camera.x_pos * parallax)
-                tile_y_pos = row * self.tile_size - (camera.y_pos * parallax)
+                tile_x_pos = col * self.tile_size - (camera.x_pos * parallax_x)
+                tile_y_pos = row * self.tile_size - (camera.y_pos * parallax_y)
 
                 self.screen.blit(
                     self.tile_surfaces[tile_type],
