@@ -19,6 +19,7 @@ class Player(Entity):
         self.is_moving = False
         self.is_grounded = False
         self.bottom = self.y_pos + self.height
+        self.current_animation = "idle_right"
 
         sprite_sheet_path = os.path.join("data", "sprites", "player.png")
         sprites = SpriteSheet(sprite_sheet_path)
@@ -39,7 +40,7 @@ class Player(Entity):
             "jump_left": jump_left,
         }
 
-        self.animator = Animator(self.animations.get("idle_right"), 0.2)
+        self.animator = Animator(self.animations.get(self.current_animation), 0.2)
 
     def handle_input(self, input_handler):
         if input_handler.is_held(pygame.K_d) or input_handler.is_held(pygame.K_RIGHT):
@@ -66,21 +67,21 @@ class Player(Entity):
                 self.x_vel *= 0.95
 
                 if self.facing_left:
-                    self.current_state = "jump_left"
+                    self.current_animation = "jump_left"
                 else:
-                    self.current_state = "jump_right"
+                    self.current_animation = "jump_right"
             else:
                 self.x_vel = 0
 
                 if self.facing_left:
-                    self.current_state = "idle_left"
+                    self.current_animation = "idle_left"
                 else:
-                    self.current_state = "idle_right"
+                    self.current_animation = "idle_right"
         else:
             if self.facing_left:
-                self.current_state = "walk_left"
+                self.current_animation = "walk_left"
             else:
-                self.current_state = "walk_right"
+                self.current_animation = "walk_right"
 
     def draw(self, screen, camera):
         screen.blit(
@@ -104,10 +105,7 @@ class Player(Entity):
         self.bottom = self.y_pos + self.height
         self.detect_vertical_collision(level)
 
-        self.animator.update(delta)
-        current_state = self.animations.get(self.current_state)
-        if current_state != self.animator.current_state:
-            self.animator.set_state(self.animations.get(self.current_state))
+        self.animator.update(delta, self.animations.get(self.current_animation))
 
         super().update(delta, input_handler, level)
 

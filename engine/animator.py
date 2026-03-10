@@ -9,11 +9,14 @@ class Animator:
         self.current_state = state
         self.current_frame = 0
 
-    def update(self, delta):
+    def update(self, delta, possibly_updated_state):
         self.timer += delta
         if self.timer >= self.frame_duration_in_seconds:
             self.timer -= self.frame_duration_in_seconds
             self.current_frame = (self.current_frame + 1) % len(self.current_state)
+
+        if possibly_updated_state != self.current_state:
+            self.set_state(possibly_updated_state)
 
     def get_current_frame(self):
         return self.current_state[self.current_frame]
