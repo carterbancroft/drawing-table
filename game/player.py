@@ -2,7 +2,7 @@ import os
 
 import pygame
 
-from engine import Entity, SpriteSheet
+from engine import Animator, Entity, SpriteSheet
 
 
 class Player(Entity):
@@ -11,7 +11,7 @@ class Player(Entity):
 
         self.move_speed = 300  # pixels per second
         self.gravity = 1500  # pixeld per second squared
-        self.jump_strength = -600  # pixels `per second
+        self.jump_strength = -600  # pixels per second
         self.jump_count = 0
         self.max_jumps = 3
         self.is_jumping = False
@@ -20,7 +20,13 @@ class Player(Entity):
         self.bottom = self.y_pos + self.height
 
         sprite_sheet_path = os.path.join("data", "sprites", "player.png")
-        self.sprites = SpriteSheet(sprite_sheet_path)
+        sprites = SpriteSheet(sprite_sheet_path)
+        animations = {
+            "stop": [sprites.get_frame(0, 0, 16, 32)],
+            "walk": sprites.get_frame_grid(self.width, self.height, 0, 4),
+        }
+
+        self.animator = Animator(animations.get("walk"), 0.2)
 
     def handle_input(self, input_handler):
         if input_handler.is_held(pygame.K_d) or input_handler.is_held(pygame.K_RIGHT):
@@ -46,9 +52,14 @@ class Player(Entity):
             else:
                 self.x_vel = 0
 
+        if not self.is_moving:
+            self.current_state = "walk"
+        else:
+            self.current_state = "stop"
+
     def draw(self, screen, camera):
         screen.blit(
-            self.sprites.get_frame(0, 0, 16, 32),
+            self.animator.get_current_frame(),
             (
                 camera.to_screen_x(self.x_pos),
                 camera.to_screen_y(self.y_pos),
@@ -67,6 +78,8 @@ class Player(Entity):
         self.y_pos += self.y_vel * delta
         self.bottom = self.y_pos + self.height
         self.detect_vertical_collision(level)
+
+        self.animator.update(delta)
 
         super().update(delta, input_handler, level)
 
