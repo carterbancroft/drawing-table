@@ -10,6 +10,7 @@ class Player(Entity):
         super().__init__(x_pos, y_pos, width=16, height=32, z_index=1)
 
         self.move_speed = 300  # pixels per second
+        self.facing_left = False
         self.gravity = 1500  # pixeld per second squared
         self.jump_strength = -600  # pixels per second
         self.jump_count = 0
@@ -21,20 +22,34 @@ class Player(Entity):
 
         sprite_sheet_path = os.path.join("data", "sprites", "player.png")
         sprites = SpriteSheet(sprite_sheet_path)
-        animations = {
-            "stop": [sprites.get_frame(0, 0, 16, 32)],
-            "walk": sprites.get_frame_grid(self.width, self.height, 0, 4),
+
+        idle_right = sprites.get_frame(0, 0, 16, 32)
+        idle_left = pygame.transform.flip(idle_right, True, False)
+        walk_right = sprites.get_frame_grid(self.width, self.height, 0, 4)
+        walk_left = [pygame.transform.flip(frame, True, False) for frame in walk_right]
+        jump_right = sprites.get_frame_grid(self.width, self.height, 1, 4)
+        jump_left = [pygame.transform.flip(frame, True, False) for frame in jump_right]
+
+        self.animations = {
+            "idle_right": [idle_right],
+            "idle_left": [idle_left],
+            "walk_right": walk_right,
+            "walk_left": walk_left,
+            "jump_right": jump_right,
+            "jump_left": jump_left,
         }
 
-        self.animator = Animator(animations.get("walk"), 0.2)
+        self.animator = Animator(self.animations.get("idle_right"), 0.2)
 
     def handle_input(self, input_handler):
         if input_handler.is_held(pygame.K_d) or input_handler.is_held(pygame.K_RIGHT):
             self.is_moving = True
             self.x_vel = self.move_speed
+            self.facing_left = False
         elif input_handler.is_held(pygame.K_a) or input_handler.is_held(pygame.K_LEFT):
             self.is_moving = True
             self.x_vel = -self.move_speed
+            self.facing_left = True
         else:
             self.is_moving = False
 
@@ -49,13 +64,23 @@ class Player(Entity):
             # Add momentum decay here if jumping
             if self.is_jumping:
                 self.x_vel *= 0.95
+
+                if self.facing_left:
+                    self.current_state = "jump_left"
+                else:
+                    self.current_state = "jump_right"
             else:
                 self.x_vel = 0
 
-        if not self.is_moving:
-            self.current_state = "walk"
+                if self.facing_left:
+                    self.current_state = "idle_left"
+                else:
+                    self.current_state = "idle_right"
         else:
-            self.current_state = "stop"
+            if self.facing_left:
+                self.current_state = "walk_left"
+            else:
+                self.current_state = "walk_right"
 
     def draw(self, screen, camera):
         screen.blit(
@@ -80,6 +105,9 @@ class Player(Entity):
         self.detect_vertical_collision(level)
 
         self.animator.update(delta)
+        current_state = self.animations.get(self.current_state)
+        if current_state != self.animator.current_state:
+            self.animator.set_state(self.animations.get(self.current_state))
 
         super().update(delta, input_handler, level)
 
