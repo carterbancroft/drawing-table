@@ -7,7 +7,7 @@ from engine import Animator, Entity, SpriteSheet
 
 class Player(Entity):
     def __init__(self, x_pos, y_pos):
-        super().__init__(x_pos, y_pos, width=16, height=32, z_index=1)
+        super().__init__(x_pos, y_pos, width=32, height=64, z_index=1)
 
         self.move_speed = 300  # pixels per second
         self.facing_left = False
@@ -24,7 +24,7 @@ class Player(Entity):
         sprite_sheet_path = os.path.join("data", "sprites", "player.png")
         sprites = SpriteSheet(sprite_sheet_path)
 
-        idle_right = sprites.get_frame(0, 0, 16, 32)
+        idle_right = sprites.get_frame(0, 0, self.width, self.height)
         idle_left = pygame.transform.flip(idle_right, True, False)
         walk_right = sprites.get_frame_grid(self.width, self.height, 0, 4)
         walk_left = [pygame.transform.flip(frame, True, False) for frame in walk_right]
@@ -65,23 +65,24 @@ class Player(Entity):
             # Add momentum decay here if jumping
             if self.is_jumping:
                 self.x_vel *= 0.95
-
-                if self.facing_left:
-                    self.current_animation = "jump_left"
-                else:
-                    self.current_animation = "jump_right"
             else:
                 self.x_vel = 0
 
-                if self.facing_left:
-                    self.current_animation = "idle_left"
-                else:
-                    self.current_animation = "idle_right"
-        else:
+        if self.is_jumping:
+            if self.facing_left:
+                self.current_animation = "jump_left"
+            else:
+                self.current_animation = "jump_right"
+        elif self.is_grounded and self.is_moving:
             if self.facing_left:
                 self.current_animation = "walk_left"
             else:
                 self.current_animation = "walk_right"
+        else:
+            if self.facing_left:
+                self.current_animation = "idle_left"
+            else:
+                self.current_animation = "idle_right"
 
     def draw(self, screen, camera):
         screen.blit(
